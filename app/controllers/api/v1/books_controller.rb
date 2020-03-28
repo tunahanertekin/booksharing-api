@@ -84,6 +84,43 @@ module Api
 
             end
 
+            def destroy
+
+                begin
+
+                    user = User.find(params[:user_id])
+                    
+                    begin
+                        book = user.books.find(params[:id])
+
+                        book.destroy
+                        render json: {
+                            status: "SUCCESS",
+                            message: "Book is deleted.",
+                            data: book
+                        }
+
+                    rescue => exception
+                        render json: {
+                            status: "FAILED",
+                            message: "Book is not found.",
+                            data: []
+                        }
+                    end
+                    
+                rescue => exception
+                    render json: {
+                        status: "FAILED",
+                        message: "User is not found.",
+                        data: []
+                    }
+                end
+
+                
+
+
+            end
+
             private def book_params
                 params.require(:book).permit(:title, :author, :price, :user_id)
             end

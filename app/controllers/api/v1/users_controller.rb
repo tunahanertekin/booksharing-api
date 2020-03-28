@@ -49,6 +49,26 @@ module Api
                 
             end
 
+            def destroy
+
+                begin
+                    user = User.find(params[:id])
+                    user.destroy
+                    
+                    render json: {
+                        status: "SUCCESS",
+                        message: "User is deleted.",
+                        data: user
+                    }
+                rescue => exception
+                    render json: {
+                        status: "FAILED",
+                        message: "User is not found.",
+                        data: user
+                    }
+                end
+                  
+            end
 
 
             private def users_params
