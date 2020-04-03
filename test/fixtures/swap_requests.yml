@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  toUser: 
+  booksOffered: MyText
+  booksWanted: MyText
+  isPending: false
+  isAccepted: false
+  ancestorRequest: 
+  childRequest: 
+
+two:
+  user: two
+  toUser: 
+  booksOffered: MyText
+  booksWanted: MyText
+  isPending: false
+  isAccepted: false
+  ancestorRequest: 
+  childRequest: 

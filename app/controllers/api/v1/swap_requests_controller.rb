@@ -1,0 +1,222 @@
+module Api
+    module V1
+
+        class SwapRequestsController < ApplicationController
+
+            def index
+                begin
+                    user = User.find(params[:user_id])
+                    swapRequestsDb = user.swap_requests
+
+                    swapRequests = Array.new
+                    
+                    swapRequestsDb.each do |req|
+
+                        toUser = User.find(req.toUser)
+                        booksOffered = Array.new
+                        booksWanted = Array.new
+
+                        req.booksOffered.split(",").each do |bookId|
+                            booksOffered.push(user.books.find(bookId))
+                        end
+
+                        req.booksWanted.split(",").each do |bookId|
+                            booksWanted.push(toUser.books.find(bookId))
+                        end
+
+                        #Find out if it's root request. If not, return it's ancestor
+                        if req.ancestorRequest == 1
+                            isRoot = true
+                            ancestorRequest = {}
+                        else
+                            isRoot = false
+                            ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                        end
+
+                        #Find out if it's youngest child request in it's chain. If not, return it's child
+                        if req.childRequest == 1
+                            isYoungest = true
+                            childRequest = {}
+                        else
+                            isYoungest = false
+                            childRequest = SwapRequest.find(req.childRequest)
+                        end
+
+                        swapRequests.push({
+                            id: req.id,
+                            created_at: req.created_at,
+                            isPending: req.isPending,
+                            isAccepted: req.isAccepted,
+                            user: user,
+                            toUser: toUser,
+                            booksOffered: booksOffered,
+                            booksWanted: booksWanted,
+                            isRoot: isRoot,
+                            ancestorRequest: ancestorRequest,
+                            isYoungest: isYoungest,
+                            childRequest: childRequest,
+                        })
+                    end
+
+                    render json: {
+                        status: 'SUCCESS',
+                        message: 'Swap requests are loaded.',
+                        data: swapRequests
+                    }
+                rescue => exception
+                    render json: {
+                        status: 'FAILED',
+                        message: exception.message,
+                        data: []
+                    }
+                end
+            end
+
+            def show
+                begin
+                    user = User.find(params[:user_id])
+
+                    begin
+                        swapRequestDb = user.swap_requests.find([params[:id]])[0]
+
+    
+                        toUser = User.find(swapRequestDb.toUser)
+                        booksOffered = Array.new
+                        booksWanted = Array.new
+
+                        swapRequestDb.booksOffered.split(",").each do |bookId|
+                            booksOffered.push(user.books.find(bookId))
+                        end
+
+                        swapRequestDb.booksWanted.split(",").each do |bookId|
+                            booksWanted.push(toUser.books.find(bookId))
+                        end
+
+                        #Find out if it's root request. If not, return it's ancestor
+                        if swapRequestDb.ancestorRequest == 1
+                            isRoot = true
+                            ancestorRequest = {}
+                        else
+                            isRoot = false
+                            ancestorRequest = SwapRequest.find(swapRequestDb.ancestorRequest)
+                        end
+
+                        #Find out if it's youngest child request in it's chain. If not, return it's child
+                        if swapRequestDb.childRequest == 1
+                            isYoungest = true
+                            childRequest = {}
+                        else
+                            isYoungest = false
+                            childRequest = SwapRequest.find(swapRequestDb.childRequest)
+                        end
+
+                        swapRequest = {
+                            id: swapRequestDb.id,
+                            created_at: swapRequestDb.created_at,
+                            isPending: swapRequestDb.isPending,
+                            isAccepted: swapRequestDb.isAccepted,
+                            user: user,
+                            toUser: toUser,
+                            booksOffered: booksOffered,
+                            booksWanted: booksWanted,
+                            isRoot: isRoot,
+                            ancestorRequest: ancestorRequest,
+                            isYoungest: isYoungest,
+                            childRequest: childRequest,
+                        }
+
+                        
+                        render json: {
+                            status: 'Success',
+                            message: 'swap request is loaded.',
+                            data: swapRequest
+                        }
+
+                    rescue => exception
+                        render json: {
+                            status: 'FAILED',
+                            message: exception.message,
+                            data: []
+                        }
+                    end
+
+
+                rescue => exception
+                    render json: {
+                            status: 'FAILED',
+                            message: 'User is not found.',
+                            data: []
+                        }
+                end
+                
+            end
+
+            def create
+                begin
+                    user = User.find(params[:user_id])
+
+                    begin
+                        swapRequest = user.swap_requests.create(swapRequest_params)
+                        render json: {
+                            status: "SUCCESS",
+                            message: "A new swap request is added to user's library.",
+                            data: swapRequest
+                        }
+                    rescue => exception
+                        render json: {
+                            status: "FAILED",
+                            message: "Error occurred when adding new swap request.",
+                            data: []
+                        }
+                    end
+                    
+                rescue => exception
+                    render json: {
+                        status: "FAILED",
+                        message: "User is not found.",
+                        data: []
+                    }
+                end
+
+            end
+
+            def destroy
+                begin
+
+                    user = User.find(params[:user_id])
+                    
+                    begin
+                        swapRequest = user.swap_requests.find(params[:id])
+
+                        swapRequest.destroy
+                        render json: {
+                            status: "SUCCESS",
+                            message: "Swap request is deleted.",
+                            data: swapRequest
+                        }
+
+                    rescue => exception
+                        render json: {
+                            status: "FAILED",
+                            message: "Swap request is not found.",
+                            data: []
+                        }
+                    end
+                    
+                rescue => exception
+                    render json: {
+                        status: "FAILED",
+                        message: "User is not found.",
+                        data: []
+                    }
+                end
+            end
+
+            private def swapRequest_params
+                params.require(:swapRequest).permit(:user_id, :toUser, :booksOffered, :booksWanted, :isPending, :isAccepted, :ancestorRequest, :childRequest)
+            end
+
+        end
+    
+    end
+end

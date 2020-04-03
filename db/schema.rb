@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_25_174945) do
+ActiveRecord::Schema.define(version: 2020_03_30_101236) do
 
   create_table "books", force: :cascade do |t|
     t.string "title"
@@ -20,6 +20,20 @@ ActiveRecord::Schema.define(version: 2020_03_25_174945) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "imageSource"
     t.index ["user_id"], name: "index_books_on_user_id"
+  end
+
+  create_table "swap_requests", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "toUser"
+    t.text "booksOffered"
+    t.text "booksWanted"
+    t.boolean "isPending"
+    t.boolean "isAccepted"
+    t.integer "ancestorRequest"
+    t.integer "childRequest"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_swap_requests_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -33,7 +47,9 @@ ActiveRecord::Schema.define(version: 2020_03_25_174945) do
     t.decimal "score"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "imageSource"
   end
 
   add_foreign_key "books", "users"
+  add_foreign_key "swap_requests", "users"
 end
