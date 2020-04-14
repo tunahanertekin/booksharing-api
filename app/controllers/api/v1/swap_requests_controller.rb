@@ -3,6 +3,9 @@ module Api
 
         class SwapRequestsController < ApplicationController
 
+
+
+
             def index
                 begin
                     user = User.find(params[:user_id])
@@ -72,6 +75,10 @@ module Api
                 end
             end
 
+
+
+
+
             def show
                 begin
                     user = User.find(params[:user_id])
@@ -127,7 +134,7 @@ module Api
 
                         
                         render json: {
-                            status: 'Success',
+                            status: 'SUCCESS',
                             message: 'swap request is loaded.',
                             data: swapRequest
                         }
@@ -150,6 +157,10 @@ module Api
                 end
                 
             end
+
+
+
+
 
             def create
                 begin
@@ -179,6 +190,10 @@ module Api
                 end
 
             end
+
+
+
+
 
             def destroy
                 begin
@@ -212,6 +227,163 @@ module Api
                 end
             end
 
+
+
+
+
+            def receiving
+                
+                begin
+                    toUser = User.find(params[:user_id])
+
+                    swapRequestsDb = SwapRequest.all.select{ |item| item.toUser==params[:user_id].to_i }
+                    
+                    swapRequests = Array.new
+                    
+                    swapRequestsDb.each do |req|
+
+                        user = User.find(req.user_id)
+                        booksOffered = Array.new
+                        booksWanted = Array.new
+
+                        req.booksOffered.split(",").each do |bookId|
+                            booksOffered.push(user.books.find(bookId))
+                        end
+
+                        req.booksWanted.split(",").each do |bookId|
+                            booksWanted.push(toUser.books.find(bookId))
+                        end
+
+                        #Find out if it's root request. If not, return it's ancestor
+                        if req.ancestorRequest == 1
+                            isRoot = true
+                            ancestorRequest = {}
+                        else
+                            isRoot = false
+                            ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                        end
+
+                        #Find out if it's youngest child request in it's chain. If not, return it's child
+                        if req.childRequest == 1
+                            isYoungest = true
+                            childRequest = {}
+                        else
+                            isYoungest = false
+                            childRequest = SwapRequest.find(req.childRequest)
+                        end
+
+                        swapRequests.push({
+                            id: req.id,
+                            created_at: req.created_at,
+                            isPending: req.isPending,
+                            isAccepted: req.isAccepted,
+                            user: user,
+                            toUser: toUser,
+                            booksOffered: booksOffered,
+                            booksWanted: booksWanted,
+                            isRoot: isRoot,
+                            ancestorRequest: ancestorRequest,
+                            isYoungest: isYoungest,
+                            childRequest: childRequest,
+                        })
+                    end
+
+                    render json: {
+                        status: 'SUCCESS',
+                        message: 'Receiving swap requests are loaded.',
+                        data: swapRequests
+                    }
+
+                rescue => exception
+                    
+                    render json: {
+                        status: "FAILURE",
+                        message: exception.message,
+                        data: []
+                    }
+
+                end
+                
+                
+            end
+
+
+
+
+            def showReceiving
+
+                begin
+                    toUser = User.find(params[:user_id])
+
+                    sr = SwapRequest.all.select{ |item| item.toUser==params[:user_id].to_i }
+                    
+                    swapRequestDb = sr.find{ |item| item.id==params[:id].to_i }
+
+                    user = User.find(swapRequestDb.user_id)
+                    booksOffered = Array.new
+                    booksWanted = Array.new
+
+                    swapRequestDb.booksOffered.split(",").each do |bookId|
+                        booksOffered.push(user.books.find(bookId))
+                    end
+
+                    swapRequestDb.booksWanted.split(",").each do |bookId|
+                        booksWanted.push(toUser.books.find(bookId))
+                    end
+
+                    #Find out if it's root request. If not, return it's ancestor
+                    if swapRequestDb.ancestorRequest == 1
+                        isRoot = true
+                        ancestorRequest = {}
+                    else
+                        isRoot = false
+                        ancestorRequest = SwapRequest.find(swapRequestDb.ancestorRequest)
+                    end
+
+                    #Find out if it's youngest child request in it's chain. If not, return it's child
+                    if swapRequestDb.childRequest == 1
+                        isYoungest = true
+                        childRequest = {}
+                    else
+                        isYoungest = false
+                        childRequest = SwapRequest.find(swapRequestDb.childRequest)
+                    end
+
+                    swapRequest = {
+                        id: swapRequestDb.id,
+                        created_at: swapRequestDb.created_at,
+                        isPending: swapRequestDb.isPending,
+                        isAccepted: swapRequestDb.isAccepted,
+                        user: user,
+                        toUser: toUser,
+                        booksOffered: booksOffered,
+                        booksWanted: booksWanted,
+                        isRoot: isRoot,
+                        ancestorRequest: ancestorRequest,
+                        isYoungest: isYoungest,
+                        childRequest: childRequest,
+                    }
+
+                    
+                    render json: {
+                        status: 'SUCCESS',
+                        message: 'Receiving swap request is loaded.',
+                        data: swapRequest
+                    }
+                rescue => exception
+                    render json: {
+                        status: 'Failure',
+                        message: exception.message,
+                        data: []
+                    }
+                end
+
+                
+            end
+
+
+
+            
             private def swapRequest_params
                 params.require(:swapRequest).permit(:user_id, :toUser, :booksOffered, :booksWanted, :isPending, :isAccepted, :ancestorRequest, :childRequest)
             end

@@ -1,8 +1,9 @@
 
 
+#get received requests
+sr = SwapRequest.all.select{ |item| item.toUser==7 }
 
-
-
-SwapRequest.all.each do |sr|
+sr.each do |sr|
     sr.destroy
 end
+
