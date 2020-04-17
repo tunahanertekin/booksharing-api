@@ -194,6 +194,48 @@ module Api
 
 
 
+            def update
+
+                begin
+                    user = User.find(params[:user_id])
+                    
+                    begin
+                        swapRequest = user.swap_requests.find(params[:id])
+
+                        begin
+                            swapRequest.update(swapRequest_params)
+                            render json: {
+                                status: "SUCCESS",
+                                message: "Swap request is updated.",
+                                data: swapRequest
+                            }
+                        rescue => exception
+                            render json: {
+                                status: "FAILURE",
+                                message: exception.message,
+                                data: []
+                            }
+                        end
+                       
+                    rescue => exception
+                        render json: {
+                            status: "FAILURE",
+                            message: exception.message,
+                            data: []
+                        }
+                    end
+
+                rescue => exception
+                    render json: {
+                        status: "FAILURE",
+                        message: exception.message,
+                        data: []
+                    }
+                end
+            end
+
+
+
 
             def destroy
                 begin

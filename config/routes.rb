@@ -8,6 +8,7 @@ Rails.application.routes.draw do
         get 'receiving/:id', to: 'swap_requests#showReceiving'
         resources :swap_requests 
         resources :books
+        resources :exchanges
       end
     end
   end
