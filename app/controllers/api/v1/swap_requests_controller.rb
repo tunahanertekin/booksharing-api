@@ -33,7 +33,14 @@ module Api
                             ancestorRequest = {}
                         else
                             isRoot = false
-                            ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                            begin
+                                ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                            rescue => exception
+                                ancestorRequest = {
+                                    status: "missing",
+                                    message: "Ancestor is missing."
+                                }
+                            end
                         end
 
                         #Find out if it's youngest child request in it's chain. If not, return it's child
@@ -42,7 +49,14 @@ module Api
                             childRequest = {}
                         else
                             isYoungest = false
-                            childRequest = SwapRequest.find(req.childRequest)
+                            begin
+                                childRequest = SwapRequest.find(req.childRequest)
+                            rescue => exception
+                                childRequest = {
+                                    status: "missing",
+                                    message: "Child is missing."
+                                }
+                            end
                         end
 
                         swapRequests.push({
@@ -105,7 +119,14 @@ module Api
                             ancestorRequest = {}
                         else
                             isRoot = false
-                            ancestorRequest = SwapRequest.find(swapRequestDb.ancestorRequest)
+                            begin
+                                ancestorRequest = SwapRequest.find(swapRequestDb.ancestorRequest)
+                            rescue => exception
+                                ancestorRequest = {
+                                    status: "missing",
+                                    message: "Ancestor is missing."
+                                }                                
+                            end
                         end
 
                         #Find out if it's youngest child request in it's chain. If not, return it's child
@@ -114,7 +135,14 @@ module Api
                             childRequest = {}
                         else
                             isYoungest = false
-                            childRequest = SwapRequest.find(swapRequestDb.childRequest)
+                            begin
+                                childRequest = SwapRequest.find(swapRequestDb.childRequest)
+                            rescue => exception
+                                childRequest = {
+                                    status: "missing",
+                                    message: "Child is missing."
+                                }
+                            end
                         end
 
                         swapRequest = {
@@ -302,7 +330,14 @@ module Api
                             ancestorRequest = {}
                         else
                             isRoot = false
-                            ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                            begin
+                                ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                            rescue => exception
+                                ancestorRequest = {
+                                    status: "missing",
+                                    message: "Ancestor is missing."
+                                }
+                            end
                         end
 
                         #Find out if it's youngest child request in it's chain. If not, return it's child
@@ -311,7 +346,14 @@ module Api
                             childRequest = {}
                         else
                             isYoungest = false
-                            childRequest = SwapRequest.find(req.childRequest)
+                            begin
+                                childRequest = SwapRequest.find(req.childRequest)
+                            rescue => exception
+                                childRequest = {
+                                    status: "missing",
+                                    message: "Child is missing."
+                                }
+                            end
                         end
 
                         swapRequests.push({
@@ -379,7 +421,14 @@ module Api
                         ancestorRequest = {}
                     else
                         isRoot = false
-                        ancestorRequest = SwapRequest.find(swapRequestDb.ancestorRequest)
+                        begin
+                            ancestorRequest = SwapRequest.find(req.ancestorRequest)
+                        rescue => exception
+                            ancestorRequest = {
+                                status: "missing",
+                                message: "Ancestor is missing."
+                            }
+                        end
                     end
 
                     #Find out if it's youngest child request in it's chain. If not, return it's child
@@ -388,7 +437,14 @@ module Api
                         childRequest = {}
                     else
                         isYoungest = false
-                        childRequest = SwapRequest.find(swapRequestDb.childRequest)
+                        begin
+                            childRequest = SwapRequest.find(req.childRequest)
+                        rescue => exception
+                            childRequest = {
+                                status: "missing",
+                                message: "Child is missing."
+                            }
+                        end
                     end
 
                     swapRequest = {
@@ -423,6 +479,44 @@ module Api
                 
             end
 
+
+
+
+            def removeChain
+                
+                begin
+                    deleteChain(params[:user_id], params[:id])
+                    render json: {
+                        status: "SUCCESS",
+                        message: "Chain of this request is removed."
+                    }
+                rescue => exception
+                    render json: {
+                        status: "FAILED",
+                        message: exception.message
+                    }
+                end
+                
+
+            end
+
+
+
+            #this method deletes all chain
+            private def deleteChain(user_id, id)
+
+                youngestSwapRequest = SwapRequest.all.find(id)
+
+                if youngestSwapRequest.ancestorRequest == 1
+                    youngestSwapRequest.destroy
+                    return
+                else
+                    ancestorId = youngestSwapRequest.ancestorRequest
+                    youngestSwapRequest.destroy
+                    return deleteChain(user_id, ancestorId)
+                end
+
+            end
 
 
             
