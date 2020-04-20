@@ -7,6 +7,7 @@ Rails.application.routes.draw do
         get 'receiving', to: 'swap_requests#receiving'
         get 'receiving/:id', to: 'swap_requests#showReceiving'
         delete 'remove_chain/:id', to: 'swap_requests#removeChain'
+        delete 'remove_all_exchanges', to: 'exchanges#removeAllExchanges'
         resources :swap_requests 
         resources :books
         resources :exchanges
