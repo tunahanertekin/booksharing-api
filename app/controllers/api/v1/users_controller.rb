@@ -3,12 +3,20 @@ module Api
         class UsersController < ApplicationController
 
             def index
-                users = User.all
-                render json: {
-                    status: 'SUCCESS', 
-                    message: 'Users are loaded.',
-                    data: users
-                }
+                begin
+                    users = User.all
+                    render json: {
+                        status: 'SUCCESS', 
+                        message: 'Users are loaded.',
+                        data: users
+                    }
+                rescue => exception
+                    render json: {
+                        status: 'FAILED', 
+                        message: exception.message,
+                        data: users
+                    }
+                end
             end
 
             def show
@@ -23,7 +31,7 @@ module Api
                 rescue => exception
                     render json: {
                         status: 'FAILED',
-                        message: 'User is not found.',
+                        message: exception.message,
                         data: []
                     }
                 end
@@ -31,21 +39,31 @@ module Api
             end
 
             def create
-                user = User.new(users_params)
 
-                if user.save
-                    render json: {
-                        status: "SUCCESS",
-                        message: "New user is added.",
-                        data: user
-                    }
-                else
+                begin
+                    user = User.new(users_params)
+
+                    if user.save
+                        render json: {
+                            status: "SUCCESS",
+                            message: "New user is added.",
+                            data: user
+                        }
+                    else
+                        render json: {
+                            status: "FAILED",
+                            message: exception.message,
+                            data: []
+                        }
+                    end
+                rescue => exception
                     render json: {
                         status: "FAILED",
-                        message: "Error when adding a new user.",
+                        message: exception.message,
                         data: []
                     }
                 end
+                
                 
             end
 
@@ -63,7 +81,7 @@ module Api
                 rescue => exception
                     render json: {
                         status: "FAILED",
-                        message: "User is not found.",
+                        message: exception.message,
                         data: user
                     }
                 end
