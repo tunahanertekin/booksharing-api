@@ -22,8 +22,6 @@ test:
 
 production:
   adapter: postgresql
-  encoding: unicode
   database: sample
-  pool: 5
   username: firstapi
-  password: 123
+  password: <%= ENV['DATABASE_PASSWORD'] %>
